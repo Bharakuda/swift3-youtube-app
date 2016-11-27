@@ -8,27 +8,55 @@
 //
 
 import UIKit
+import Alamofire
+
+protocol VideoModelDelegate {
+    func dataReady()
+}
 
 class VideoModel: NSObject {
     
-    // Method for UIViewController to call
-    func getFeedVideos() -> [Video] {
-        
-        var videos = [Video]()
-        
-        // Create a video object
-        let video1 = Video()
-        
-        // Assign properties
-        video1.videoId = "some video id"
-        video1.videoTitle = "some title"
-        video1.videoDescription = "some description"
-        video1.videoThumbnail = "some thumbnail"
-        
-        // Append it into the videos array
-        videos.append(video1)
+    let parameters: Parameters = [
+        "part": "snippet",
+        "playlistId": "PLpZBns8dFbgyCJ-ftS7inE9AYEdorFt_Q",
+        "key": "AIzaSyCzH2l_e_-tEeGHby2XGwsOHmJVA0S_U9Q"
+    ]
     
-        return videos
+    var videoArray = [Video]()
+    var delegate: VideoModelDelegate?
+    
+    // Method for UIViewController to call
+    func getFeedVideos() {
+        
+        // Fetch the videos dynamically through the YouTube Data API
+        Alamofire.request("https://www.googleapis.com/youtube/v3/playlists", parameters: parameters).responseJSON { (response) in
+            
+            guard let JSON = response.result.value as? [String: Any],
+                let items = JSON["items"] as? [[String: Any]] else {
+                    return
+            }
+            var arrayOfVideos = [Video]()
+            
+            for video in items {
+                print(video)
+                // Create video objects off the JSON response
+                let videoObj = Video()
+                
+                videoObj.videoId = (video as NSDictionary).value(forKeyPath: "snippet.resourceId.videoId") as! String
+                videoObj.videoTitle = (video as NSDictionary).value(forKeyPath: "snippet.title") as! String
+                videoObj.videoDescription = (video as NSDictionary).value(forKeyPath: "snippet.description") as! String
+
+                arrayOfVideos.append(videoObj)
+                
+                if self.delegate != nil {
+                    self.delegate!.dataReady()
+                }
+            }
+            
+            // When all the video objects have been constructed, assign the array to the VideoModel property
+            self.videoArray = arrayOfVideos
+            
+        }
     }
 
 }
