@@ -12,7 +12,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
     @IBOutlet weak var tableView: UITableView!
     var videos: [Video] = [Video]()
-    let model: VideoModel = VideoModel()
+    var model: VideoModel = VideoModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
