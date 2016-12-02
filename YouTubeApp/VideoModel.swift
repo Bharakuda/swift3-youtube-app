@@ -25,7 +25,7 @@ class VideoModel: NSObject {
     
     func getFeedVideos() {
         
-        Alamofire.request("http://www.googleapis.com/youtube/v3/playlistItems", parameters: parameters).responseJSON { (response) in
+        Alamofire.request("https://www.googleapis.com/youtube/v3/playlistItems", parameters: parameters).responseJSON { (response) in
             
             if let JSON = response.result.value as? [String: Any] {
                 var arrayOfVideos = [Video]()
@@ -38,18 +38,14 @@ class VideoModel: NSObject {
                         
                         videoObj.videoId = (video as NSDictionary).value(forKeyPath: "snippet.resourceId.videoId") as! String
                         videoObj.videoTitle = (video as NSDictionary).value(forKeyPath: "snippet.title") as! String
-                        
                         arrayOfVideos.append(videoObj)
-                        print(videoObj)
                     }
                 }
                 self.videosArray = arrayOfVideos
             }
-        }
-        
-        if self.delegate != nil {
-            self.delegate!.dataReady()
+            if self.delegate != nil {
+                self.delegate!.dataReady()
+            }
         }
     }
-
 }

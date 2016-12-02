@@ -11,8 +11,8 @@ import UIKit
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, VideoModelDelegate {
 
     @IBOutlet weak var tableView: UITableView!
-    var videos: [Video] = [Video]()
-    var model: VideoModel = VideoModel()
+    var videos = [Video]()
+    var model = VideoModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +29,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     // MARK: - VideoModelDelegate Methods
     func dataReady() {
         // Access the video objects that have been downloaded
-        self.videos = self.model.videosArray
+        self.videos = model.videosArray
         self.tableView.reloadData()
     }
     
