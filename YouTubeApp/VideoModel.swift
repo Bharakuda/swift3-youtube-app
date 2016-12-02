@@ -15,28 +15,22 @@ protocol VideoModelDelegate {
 }
 
 class VideoModel: NSObject {
-    
+    var delegate: VideoModelDelegate?
+    var videosArray = [Video]()
     let parameters: Parameters = [
         "part": "snippet",
         "playlistId": "PLpZBns8dFbgyCJ-ftS7inE9AYEdorFt_Q",
         "key": "AIzaSyCzH2l_e_-tEeGHby2XGwsOHmJVA0S_U9Q"
     ]
     
-    var videoArray = [Video]()
-    var delegate: VideoModelDelegate?
-    
-    // Method for UIViewController to call
     func getFeedVideos() {
         
-        // Fetch the videos dynamically through the YouTube Data API
-        Alamofire.request("https://www.googleapis.com/youtube/v3/playlistItems", parameters: parameters).responseJSON { (response) in
+        Alamofire.request("http://www.googleapis.com/youtube/v3/playlistItems", parameters: parameters).responseJSON { (response) in
             
             if let JSON = response.result.value as? [String: Any] {
-
                 var arrayOfVideos = [Video]()
                 
                 if let items = JSON["items"] as? [[String: Any]] {
-                    
                     for video in items {
                         
                         // Create video objects off the JSON response
@@ -46,17 +40,15 @@ class VideoModel: NSObject {
                         videoObj.videoTitle = (video as NSDictionary).value(forKeyPath: "snippet.title") as! String
                         
                         arrayOfVideos.append(videoObj)
-                        
-                        if self.delegate != nil {
-                            self.delegate!.dataReady()
-                        }
+                        print(videoObj)
                     }
-                
                 }
-                // When all the video objects have been constructed, assign the array to the VideoModel property
-                self.videoArray = arrayOfVideos
+                self.videosArray = arrayOfVideos
             }
-            
+        }
+        
+        if self.delegate != nil {
+            self.delegate!.dataReady()
         }
     }
 
