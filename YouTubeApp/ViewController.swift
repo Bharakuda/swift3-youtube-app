@@ -7,30 +7,51 @@
 //
 
 import UIKit
+import Alamofire
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, VideoModelDelegate {
-
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    
     @IBOutlet weak var tableView: UITableView!
-    var videos = [Video]()
-    var model = VideoModel()
+    var videos: [Video] = [Video]()
+    
+    let parameters: Parameters = [
+        "part": "snippet",
+        "playlistId": "PLpZBns8dFbgyCJ-ftS7inE9AYEdorFt_Q",
+        "key": "AIzaSyCzH2l_e_-tEeGHby2XGwsOHmJVA0S_U9Q"
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.model.delegate = self
-        
-        // Fire off request to get videos
-        self.model.getFeedVideos()
-        
         self.tableView.dataSource = self
         self.tableView.delegate = self
+        self.fetchVideos()
+        
     }
     
-    // MARK: - VideoModelDelegate Methods
-    func dataReady() {
-        // Access the video objects that have been downloaded
-        self.videos = model.videosArray
-        self.tableView.reloadData()
+    func fetchVideos() {
+        Alamofire.request("https://www.googleapis.com/youtube/v3/playlistItems", parameters: parameters).responseJSON { (response) in
+            
+            if let JSON = response.result.value as? [String: Any] {
+                var arrayOfVideos = [Video]()
+                
+                if let items = JSON["items"] as? [[String: Any]] {
+                    for video in items {
+                        
+                        // Create video objects off the JSON response
+                        let videoObj = Video()
+                        
+                        videoObj.videoId = (video as NSDictionary).value(forKeyPath: "snippet.resourceId.videoId") as! String
+                        videoObj.videoTitle = (video as NSDictionary).value(forKeyPath: "snippet.title") as! String
+                        
+                        arrayOfVideos.append(videoObj)
+                        print(videoObj)
+                    }
+                }
+                self.videos = arrayOfVideos
+                self.tableView.reloadData()
+            }
+        }
     }
     
     // MARK: - TableViewDelegate Methods
@@ -44,5 +65,5 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         return cell
     }
-
+    
 }
